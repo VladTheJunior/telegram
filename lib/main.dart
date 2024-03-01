@@ -27,11 +27,17 @@ class MyApp extends StatelessWidget {
           title: "Telegram Web JS",
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
-  colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue,  brightness: Brightness.light,),
-),
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.blue,
+              brightness: Brightness.light,
+            ),
+          ),
           darkTheme: ThemeData(
-  colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple,  brightness: Brightness.dark,),
-),
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.deepPurple,
+              brightness: Brightness.dark,
+            ),
+          ),
           themeMode: mode,
           home: const HomeView(),
         );
