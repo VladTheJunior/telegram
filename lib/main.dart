@@ -26,8 +26,12 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           title: "Telegram Web JS",
           debugShowCheckedModeBanner: false,
-          theme: TelegramTheme.light,
-          darkTheme: TelegramTheme.dark,
+          theme: ThemeData(
+  colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue,  brightness: Brightness.light,),
+),
+          darkTheme: ThemeData(
+  colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple,  brightness: Brightness.dark,),
+),
           themeMode: mode,
           home: const HomeView(),
         );
