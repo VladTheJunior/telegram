@@ -6,6 +6,8 @@ import 'package:flutter_telegram_web_app/flutter_telegram_web_app.dart';
 import 'package:telegram_app/main.dart';
 import 'package:telegram_app/process_log_view.dart';
 
+import 'widget/profile_image.dart';
+
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
 
@@ -79,21 +81,44 @@ class _HomeViewState extends State<HomeView> {
     ).show();
   }
 
+  int selectedIndex = 0;
+  bool isExtended = false;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-              Text("sdsd"),
-      ProcessLogView(),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        NavigationRail(
+          onDestinationSelected: (value) => {
+            setState(() {
+              selectedIndex = value;
+            })
+          },
+          extended: isExtended,
+          labelType: NavigationRailLabelType.none,
+          leading: const AnimatedProfileImage(name: "Vladislav Chupin",
           
-            const Divider(),
-         
+          ),
+          destinations: const [
+            NavigationRailDestination(
+                icon: Icon(Icons.admin_panel_settings_rounded),
+                label: Text("Админка")),
+            NavigationRailDestination(
+                icon: Icon(Icons.text_snippet), label: Text("Обработка логов")),
+            NavigationRailDestination(
+                icon: Icon(Icons.explore), label: Text("BitScan")),
           ],
+          selectedIndex: selectedIndex,
         ),
-      ),
+        const VerticalDivider(
+          thickness: 1,
+          width: 1,
+        ),
+        Expanded(child: 
+        
+        ProcessLogView(),)
+        
+      ],
     );
   }
 }

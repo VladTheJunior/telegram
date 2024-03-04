@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_telegram_web_app/flutter_telegram_web_app.dart' as tg;
-import 'package:flutter_telegram_web_app/flutter_telegram_web_app.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:telegram_app/home_view.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 // user below method to update theme mode
@@ -25,6 +25,10 @@ class MyApp extends StatelessWidget {
       builder: (_, mode, __) {
         return MaterialApp(
           title: "Telegram Web JS",
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
+          supportedLocales: const [
+            Locale('ru', 'RU'),
+          ],
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(
