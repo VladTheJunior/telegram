@@ -31,8 +31,18 @@ class MyApp extends StatelessWidget {
             Locale('ru', 'RU'),
           ],
           debugShowCheckedModeBanner: false,
-          theme: TelegramTheme.light,
-          darkTheme: TelegramTheme.dark,
+          theme: ThemeData(
+              useMaterial3: true,
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.blue,
+                brightness: Brightness.light,
+              )),
+          darkTheme: ThemeData(
+              useMaterial3: true,
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.blue,
+                brightness: Brightness.dark,
+              )),
           themeMode: mode,
           home: const HomeView(),
         );

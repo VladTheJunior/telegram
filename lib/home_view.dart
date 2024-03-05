@@ -87,28 +87,24 @@ class _HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-    length: 3,
-    child: Scaffold(
-      appBar: AppBar(
-       
-      ),
-       bottomNavigationBar: const TabBar(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(),
+        bottomNavigationBar: const TabBar(
           tabs: [
             Tab(icon: Icon(Icons.admin_panel_settings_rounded)),
             Tab(icon: Icon(Icons.text_snippet)),
             Tab(icon: Icon(Icons.directions_bike)),
           ],
         ),
-      body: const TabBarView(
-            children: [
-              Icon(Icons.directions_car),
-               ProcessLogView(),
-       
-              Icon(Icons.directions_bike),
-            ],
-          ),
-    ),
-  
+        body: const TabBarView(
+          children: [
+            Icon(Icons.directions_car),
+            ProcessLogView(),
+            Icon(Icons.directions_bike),
+          ],
+        ),
+      ),
     );
   }
 }

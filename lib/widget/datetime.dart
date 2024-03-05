@@ -140,7 +140,7 @@ Widget buildTextField(DateTimeMask rangeMask) {
             inputFormatters: [rangeMask.formatter],
             autocorrect: false,
             keyboardType: rangeMask.textInputType,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
+            autovalidateMode: AutovalidateMode.always,
             validator: rangeMask.validator,
             decoration: InputDecoration(
                 hintText: rangeMask.hint,
