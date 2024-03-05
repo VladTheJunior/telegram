@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_telegram_web_app/flutter_telegram_web_app.dart' as tg;
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_telegram_web_app/flutter_telegram_web_app.dart';
 import 'package:telegram_app/home_view.dart';
 
 void main() {
@@ -30,18 +31,8 @@ class MyApp extends StatelessWidget {
             Locale('ru', 'RU'),
           ],
           debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.blue,
-              brightness: Brightness.light,
-            ),
-          ),
-          darkTheme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.deepPurple,
-              brightness: Brightness.dark,
-            ),
-          ),
+          theme: TelegramTheme.light,
+          darkTheme: TelegramTheme.dark,
           themeMode: mode,
           home: const HomeView(),
         );
