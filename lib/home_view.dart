@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import 'package:telegram_app/common_widgets.dart';
 import 'package:flutter_telegram_web_app/flutter_telegram_web_app.dart' as tg;
@@ -85,40 +86,29 @@ class _HomeViewState extends State<HomeView> {
   bool isExtended = false;
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        NavigationRail(
-          onDestinationSelected: (value) => {
-            setState(() {
-              selectedIndex = value;
-            })
-          },
-          extended: isExtended,
-          labelType: NavigationRailLabelType.none,
-          leading: const AnimatedProfileImage(name: "Vladislav Chupin",
-          
-          ),
-          destinations: const [
-            NavigationRailDestination(
-                icon: Icon(Icons.admin_panel_settings_rounded),
-                label: Text("Админка")),
-            NavigationRailDestination(
-                icon: Icon(Icons.text_snippet), label: Text("Обработка логов")),
-            NavigationRailDestination(
-                icon: Icon(Icons.explore), label: Text("BitScan")),
+    return DefaultTabController(
+    length: 3,
+    child: Scaffold(
+      appBar: AppBar(
+       
+      ),
+       bottomNavigationBar: const TabBar(
+          tabs: [
+            Tab(icon: Icon(Icons.admin_panel_settings_rounded)),
+            Tab(icon: Icon(Icons.text_snippet)),
+            Tab(icon: Icon(Icons.directions_bike)),
           ],
-          selectedIndex: selectedIndex,
         ),
-        const VerticalDivider(
-          thickness: 1,
-          width: 1,
-        ),
-        Expanded(child: 
-        
-        ProcessLogView(),)
-        
-      ],
+      body: const TabBarView(
+            children: [
+              Icon(Icons.directions_car),
+               ProcessLogView(),
+       
+              Icon(Icons.directions_bike),
+            ],
+          ),
+    ),
+  
     );
   }
 }
