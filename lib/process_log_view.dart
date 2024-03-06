@@ -1,13 +1,8 @@
 import 'dart:convert';
-
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'common_widgets.dart';
-import 'widget/datetime.dart';
 import 'package:flutter_telegram_web_app/flutter_telegram_web_app.dart' as tg;
 import 'package:flutter_telegram_web_app/flutter_telegram_web_app.dart';
 
@@ -30,6 +25,8 @@ class ProcessLogViewState extends State<ProcessLogView> {
   Set<SearchOption> searchOption = {};
   Set<String> patterns = {};
   Set<String> ips = {};
+
+  int selectDatesStep = 4;
 
   bool progress = false;
   final _formKey = GlobalKey<FormState>();
@@ -74,173 +71,218 @@ class ProcessLogViewState extends State<ProcessLogView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          ComponentDecoration(
-                              label: "Выберите тип задачи",
-                              child: Column(children: [
-                                RadioListTile<LogProcessKind>(
-                                  title: const Text('Удаление логов'),
-                                  value: LogProcessKind.wipe,
-                                  groupValue: kind,
-                                  onChanged: (LogProcessKind? value) {
-                                    setState(() {
-                                      kind = value;
-                                    });
-                                  },
+                          Card.outlined(
+                            child: Column(children: [
+                              const ListTile(
+                                title: Text(
+                                  "ШАГ 1. Выберите тип задачи:",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
-                                RadioListTile<LogProcessKind>(
-                                  title: const Text('Поиск логов'),
-                                  value: LogProcessKind.search,
-                                  groupValue: kind,
-                                  onChanged: (LogProcessKind? value) {
-                                    setState(() {
-                                      kind = value;
-                                    });
-                                  },
-                                ),
-                              ])),
+                              ),
+                              RadioListTile<LogProcessKind>(
+                                title: const Text('Удаление логов'),
+                                value: LogProcessKind.wipe,
+                                groupValue: kind,
+                                onChanged: (LogProcessKind? value) {
+                                  setState(() {
+                                    kind = value;
+                                  });
+                                },
+                              ),
+                              RadioListTile<LogProcessKind>(
+                                title: const Text('Поиск логов'),
+                                value: LogProcessKind.search,
+                                groupValue: kind,
+                                onChanged: (LogProcessKind? value) {
+                                  setState(() {
+                                    kind = value;
+                                  });
+                                },
+                              ),
+                            ]),
+                          ),
                           const SizedBox(
                             height: 10,
                           ),
+                          Card.outlined(
+                              child: Stack(children: [ 
+                              Column(children: [
+                            ListTile(
+                              title: Text(
+                                  "ШАГ 2. Выберите IP адреса устройств:",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              subtitle: Text("Выбрано: ${ips.length}"),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            )
+                          ]),Align(alignment: Alignment.topRight, child:  Column( children: [
+
+                                IconButton(
+                                  onPressed: () async {
+                                    setState(() {
+                                      progress = true;
+                                    });
+                                    await importFromFile();
+                                    setState(() {
+                                      progress = false;
+                                    });
+                                  },
+                                  tooltip: "Из текстового файла",
+                                  icon: Icon(Icons.file_copy_sharp),
+                                ),
+                                
+                                IconButton(
+                                  onPressed: () async {
+                                    await importFromClipboard();
+                                  },
+                                  tooltip: "Из буфера обмена",
+                                  icon: Icon(Icons.copy),
+                                ),
+                              ]))]),
+                          ),
                           if (kind == LogProcessKind.search)
-                            ComponentDecoration(
-                                label: "Выберите метод поиска",
+                            Card.outlined(
                                 child: Column(children: [
-                                  CheckboxListTile(
-                                    title: const Text('По паттернам'),
-                                    value: searchOption
-                                        .contains(SearchOption.patterns),
-                                    onChanged: (bool? value) {
-                                      setState(() {
-                                        value == true
-                                            ? searchOption
-                                                .add(SearchOption.patterns)
-                                            : searchOption
-                                                .remove(SearchOption.patterns);
-                                      });
-                                    },
-                                  ),
-                                  CheckboxListTile(
-                                    title: const Text(
-                                        'В указанном диапазоне времени'),
-                                    value: searchOption
-                                        .contains(SearchOption.dates),
-                                    onChanged: (bool? value) {
-                                      setState(() {
-                                        value == true
-                                            ? searchOption
-                                                .add(SearchOption.dates)
-                                            : searchOption
-                                                .remove(SearchOption.dates);
-                                      });
-                                    },
-                                  ),
-                                ]))
+                              const ListTile(
+                                title: Text("ШАГ 3. Выберите метод поиска:",
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                              ),
+                              CheckboxListTile(
+                                title: const Text('По паттернам'),
+                                value: searchOption
+                                    .contains(SearchOption.patterns),
+                                onChanged: (bool? value) {
+                                  setState(() {
+                                    value == true
+                                        ? searchOption
+                                            .add(SearchOption.patterns)
+                                        : searchOption
+                                            .remove(SearchOption.patterns);
+                                  });
+                                },
+                              ),
+                              CheckboxListTile(
+                                title:
+                                    const Text('В указанном диапазоне времени'),
+                                value:
+                                    searchOption.contains(SearchOption.dates),
+                                onChanged: (bool? value) {
+                                  setState(() {
+                                    value == true
+                                        ? searchOption.add(SearchOption.dates)
+                                        : searchOption
+                                            .remove(SearchOption.dates);
+                                  });
+                                },
+                              ),
+                            ]))
                           else
-                            ComponentDecoration(
-                                label: "Выберите метод удаления",
+                            Card.outlined(
                                 child: Column(children: [
-                                  RadioListTile<WipeOption>(
-                                    title: const Text('Полностью'),
-                                    value: WipeOption.full,
-                                    groupValue: wipeOption,
-                                    onChanged: (WipeOption? value) {
-                                      setState(() {
-                                        wipeOption = value;
-                                      });
-                                    },
-                                  ),
-                                  RadioListTile<WipeOption>(
-                                    title: const Text(
-                                        'В указанном диапазоне времени'),
-                                    value: WipeOption.dates,
-                                    groupValue: wipeOption,
-                                    onChanged: (WipeOption? value) {
-                                      setState(() {
-                                        wipeOption = value;
-                                      });
-                                    },
-                                  ),
-                                ])),
+                              ListTile(
+                                title: Text(
+                                  "ШАГ 3. Выберите метод удаления:",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              RadioListTile<WipeOption>(
+                                title: const Text('Полностью'),
+                                value: WipeOption.full,
+                                groupValue: wipeOption,
+                                onChanged: (WipeOption? value) {
+                                  setState(() {
+                                    wipeOption = value;
+                                  });
+                                },
+                              ),
+                              RadioListTile<WipeOption>(
+                                title:
+                                    const Text('В указанном диапазоне времени'),
+                                value: WipeOption.dates,
+                                groupValue: wipeOption,
+                                onChanged: (WipeOption? value) {
+                                  setState(() {
+                                    wipeOption = value;
+                                  });
+                                },
+                              ),
+                            ])),
                           AnimatedSize(
                               curve: Curves.easeIn,
                               duration: Duration(milliseconds: 200),
                               child: searchOption
                                           .contains(SearchOption.patterns) &&
                                       kind == LogProcessKind.search
-                                  ? ComponentDecoration(
-                                      label: "Введите паттерны для поиска",
-                                      tooltipMessage:
-                                          "Паттерны для поиска, максимум 5 штук. Автоматически переводятся в нижний регистр.",
-                                      child: Padding(
-                                          padding: EdgeInsets.symmetric(
-                                              vertical: 10, horizontal: 20),
-                                          child: Column(children: [
-                                            TextField(
-                                              controller: patternsController,
-                                              decoration: InputDecoration(
-                                                label: Text("Добавить паттерн"),
-                                                suffixIcon: IconButton(
-                                                  onPressed: () {
-                                                    if (patternsController
-                                                        .text.isEmpty) {
-                                                      return;
-                                                    }
-                                                    if (patterns.length == 5) {
-                                                      ScaffoldMessenger.of(
-                                                              context)
-                                                          .showSnackBar(
-                                                        const SnackBar(
-                                                            content: Text(
-                                                                'Нельзя добавить больше 5 паттернов!')),
-                                                      );
-                                                      return;
-                                                    }
-                                                    setState(() {
-                                                      patterns.add(
-                                                          patternsController
-                                                              .text
-                                                              .toLowerCase());
-                                                    });
-                                                    patternsController.clear();
-                                                  },
-                                                  icon: const Icon(Icons.add),
-                                                ),
+                                  ? Card.outlined(
+                                      child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                          const ListTile(
+                                              title: Text(
+                                                "ШАГ 4. Введите паттерны для поиска:",
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold),
                                               ),
-                                            ),
-                                            ListView.builder(
-                                                shrinkWrap: true,
-                                                itemCount: patterns.length,
-                                                itemBuilder: (_, index) {
-                                                  return Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.start,
-                                                    children: [
-                                                      Expanded(
-                                                        child: Container(
-                                                          margin: EdgeInsets
-                                                              .symmetric(
-                                                                  horizontal: 0,
-                                                                  vertical: 10),
-                                                          child: Text(patterns
-                                                              .elementAt(
-                                                                  index)),
-                                                        ),
-                                                      ),
-                                                      IconButton(
-                                                          onPressed: () {
-                                                            setState(() {
-                                                              patterns.remove(
-                                                                  patterns
-                                                                      .elementAt(
-                                                                          index));
-                                                            });
-                                                          },
-                                                          icon:
-                                                              Icon(Icons.clear))
-                                                    ],
-                                                  );
-                                                })
-                                          ])))
+                                              subtitle: Text(
+                                                "Паттерны для поиска, максимум 5 штук. Автоматически переводятся в нижний регистр.",
+                                              )),
+                                          Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 15),
+                                              child: TextField(
+                                                controller: patternsController,
+                                                decoration: InputDecoration(
+                                                  label: const Text(
+                                                      "Добавить паттерн"),
+                                                  suffixIcon: IconButton(
+                                                    onPressed: () {
+                                                      if (patternsController
+                                                          .text.isEmpty) {
+                                                        return;
+                                                      }
+                                                      if (patterns.length ==
+                                                          5) {
+                                                        ScaffoldMessenger.of(
+                                                                context)
+                                                            .showSnackBar(
+                                                          const SnackBar(
+                                                              content: Text(
+                                                                  'Нельзя добавить больше 5 паттернов!')),
+                                                        );
+                                                        return;
+                                                      }
+                                                      setState(() {
+                                                        patterns.add(
+                                                            patternsController
+                                                                .text
+                                                                .toLowerCase());
+                                                      });
+                                                      patternsController
+                                                          .clear();
+                                                    },
+                                                    icon: const Icon(Icons.add),
+                                                  ),
+                                                ),
+                                              )),
+                                          SizedBox(
+                                            height: 10,
+                                          ),
+                                          Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 15),
+                                              child: Wrap(
+                                                children:
+                                                    patternWidgets.toList(),
+                                              )),
+                                          SizedBox(
+                                            height: 5,
+                                          ),
+                                        ]))
                                   : SizedBox()),
                           AnimatedSize(
                             curve: Curves.easeIn,
@@ -249,15 +291,21 @@ class ProcessLogViewState extends State<ProcessLogView> {
                                         kind == LogProcessKind.wipe ||
                                     searchOption.contains(SearchOption.dates) &&
                                         kind == LogProcessKind.search
-                                ? ComponentDecoration(
-                                    label: "Выберите диапазон времени",
-                                    tooltipMessage:
-                                        "Время по UTC, потому что временные метки в логах сохраняются относительно UTC.",
-                                    child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 10, horizontal: 20),
-                                        child: Column(children: [
-                                          TextFormField(
+                                ? Card.outlined(
+                                    child: Column(children: [
+                                      ListTile(
+                                          title: Text(
+                                            "ШАГ ${datesStep}. Выберите диапазон времени:",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          subtitle: Text(
+                                            "Временные метки в логах сохраняются относительно UTC.",
+                                          )),
+                                      Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 15),
+                                          child: TextFormField(
                                               controller:
                                                   startDatetimeController,
                                               inputFormatters: [
@@ -286,11 +334,11 @@ class ProcessLogViewState extends State<ProcessLogView> {
                                                     icon:
                                                         const Icon(Icons.clear),
                                                   ),
-                                                  errorMaxLines: 1)),
-                                          const SizedBox(
-                                            height: 10,
-                                          ),
-                                          TextFormField(
+                                                  errorMaxLines: 1))),
+                                      Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 15),
+                                          child: TextFormField(
                                               controller: endDatetimeController,
                                               inputFormatters: [
                                                 MaskTextInputFormatter(
@@ -318,79 +366,90 @@ class ProcessLogViewState extends State<ProcessLogView> {
                                                     icon:
                                                         const Icon(Icons.clear),
                                                   ),
-                                                  errorMaxLines: 1)),
-                                        ])),
+                                                  errorMaxLines: 1))),
+                                      const SizedBox(
+                                        height: 15,
+                                      ),
+                                    ]),
                                   )
                                 : SizedBox(),
                           ),
-                          ComponentDecoration(
-                              label: "Выберите IP адреса устройств",
-                              child: Column(children: [
-                                Row(children: [
-                                  Expanded(
-                                      child: Text("Выбрано: ${ips.length}")),
-                                  TextButton.icon(
-                                    onPressed: () async {
-                                      setState(() {
-                                        progress = true;
-                                      });
-                                      await importFromFile();
-                                      setState(() {
-                                        progress = false;
-                                      });
-                                    },
-                                    icon: Icon(Icons.upload_file),
-                                    label: Text("Из файла"),
-                                  ),
-                                  TextButton.icon(
-                                    onPressed: () async {
-                                      await importFromClipboard();
-                                    },
-                                    icon: Icon(Icons.content_paste),
-                                    label: Text("Из буфера"),
-                                  ),
-                                ]),
-                                progress
-                                    ? Center(child: CircularProgressIndicator())
-                                    : ConstrainedBox(
-                                        constraints: new BoxConstraints(
-                                          minHeight: 35.0,
-                                          maxHeight: 160.0,
-                                        ),
-                                        child: ListView.builder(
-                                            shrinkWrap: true,
-                                            itemCount: ips.length,
-                                            itemBuilder: (_, index) {
-                                              return Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                children: [
-                                                  Expanded(
-                                                    child: Container(
-                                                      margin:
-                                                          EdgeInsets.symmetric(
-                                                              horizontal: 0,
-                                                              vertical: 10),
-                                                      child: Text(
-                                                          ips.elementAt(index)),
-                                                    ),
-                                                  ),
-                                                  IconButton(
-                                                      onPressed: () {
-                                                        setState(() {
-                                                          ips.remove(
-                                                              ips.elementAt(
-                                                                  index));
-                                                        });
-                                                      },
-                                                      icon: Icon(Icons.clear))
-                                                ],
-                                              );
-                                            }))
-                              ])),
                         ],
                       )))),
         ]));
+  }
+
+  Iterable<Widget> get patternWidgets {
+    return patterns.map((String pattern) {
+      return Padding(
+        padding: const EdgeInsets.only(right: 5, bottom: 5),
+        child: Chip(
+          label: Text(pattern),
+          onDeleted: () {
+            setState(() {
+              patterns.remove(pattern);
+            });
+          },
+        ),
+      );
+    });
+  }
+
+  String? dateTimeValidator(value) {
+    if (value == null || value.isEmpty) {
+      return null;
+    }
+    final components = value.split(RegExp(r'[-:\s]'));
+    if (components.length == 6) {
+      final year = int.tryParse(components[0]);
+      final month = int.tryParse(components[1]);
+      final day = int.tryParse(components[2]);
+      final hour = int.tryParse(components[3]);
+      final minute = int.tryParse(components[4]);
+      final second = int.tryParse(components[5]);
+      if (day != null &&
+          month != null &&
+          year != null &&
+          hour != null &&
+          minute != null &&
+          second != null &&
+          components[5].length == 2) {
+        final date = DateTime(year, month, day, hour, minute, second);
+        if (date.year == year &&
+            date.month == month &&
+            date.day == day &&
+            date.hour == hour &&
+            date.minute == minute &&
+            date.second == second) {
+          return null;
+        }
+      }
+    }
+    return "неверное время";
+  }
+
+  int get datesStep {
+    if (kind == LogProcessKind.search &&
+        searchOption.contains(SearchOption.patterns)) {
+      return 5;
+    }
+    return 4;
+  }
+
+  Iterable<Widget> get ipWidgets {
+    return ips.map((String ip) {
+      return Padding(
+        padding: const EdgeInsets.only(right: 5, bottom: 5),
+        child: Chip(
+          label: Text(ip),
+          onDeleted: () {
+            setState(() {
+              ips.remove(ip);
+            });
+          },
+        ),
+      );
+    });
   }
 
   importFromClipboard() async {
@@ -402,12 +461,12 @@ class ProcessLogViewState extends State<ProcessLogView> {
     // ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
     if (data != null) {
       RegExp regex = RegExp(r"^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$");
-      Set<String> ips = await const LineSplitter()
+      Set<String> _ips = const LineSplitter()
           .convert(data!)
           .where((line) => regex.hasMatch(line))
           .toSet();
       setState(() {
-        ips = ips;
+        ips = _ips;
       });
     }
   }
@@ -422,13 +481,13 @@ class ProcessLogViewState extends State<ProcessLogView> {
     if (result != null) {
       PlatformFile file = result.files.first;
       RegExp regex = RegExp(r"^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$");
-      Set<String> ips = await file.readStream!
+      Set<String> _ips = await file.readStream!
           .map(utf8.decode)
           .transform(const LineSplitter())
           .where((line) => regex.hasMatch(line))
           .toSet();
       setState(() {
-        ips = ips;
+        ips = _ips;
       });
     }
   }

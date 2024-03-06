@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:telegram_app/admin_view.dart';
 
-import 'package:telegram_app/common_widgets.dart';
 import 'package:flutter_telegram_web_app/flutter_telegram_web_app.dart' as tg;
 import 'package:flutter_telegram_web_app/flutter_telegram_web_app.dart';
 import 'package:telegram_app/main.dart';
 import 'package:telegram_app/process_log_view.dart';
-
-import 'widget/profile_image.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -82,6 +79,8 @@ class _HomeViewState extends State<HomeView> {
     ).show();
   }
 
+Set<String> scopes = {"get_errors", "get_actions", "all"};
+  String userName = "Vladislav Chupin";
   int selectedIndex = 0;
   bool isExtended = false;
   @override
@@ -89,18 +88,18 @@ class _HomeViewState extends State<HomeView> {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        appBar: AppBar(),
+        appBar: AppBar(title: Text(userName), leading: Padding(padding: EdgeInsets.all(8) ,child:CircleAvatar(maxRadius: 10,  child: Text(userName.trim().split(RegExp(' +')).map((s) => s[0].toLowerCase()).take(2).join()),),)),
         bottomNavigationBar: const TabBar(
           tabs: [
-            Tab(icon: Icon(Icons.admin_panel_settings_rounded)),
+            Tab(icon: Icon(Icons.dashboard)),
             Tab(icon: Icon(Icons.text_snippet)),
             Tab(icon: Icon(Icons.directions_bike)),
           ],
         ),
-        body: const TabBarView(
+        body: TabBarView(
           children: [
-            Icon(Icons.directions_car),
-            ProcessLogView(),
+            AdminView(scopes: scopes.map((scope) => Key(scope).hashCode).toSet(),),
+            const ProcessLogView(),
             Icon(Icons.directions_bike),
           ],
         ),

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_telegram_web_app/flutter_telegram_web_app.dart' as tg;
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_telegram_web_app/flutter_telegram_web_app.dart';
 import 'package:telegram_app/home_view.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 // user below method to update theme mode
